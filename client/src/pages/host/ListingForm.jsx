@@ -14,7 +14,7 @@ const empty = {
   maxGuests: 2,
   bedrooms: 1,
   amenities: '',
-  imageUrl: '',
+  imageUrls: '',
 };
 
 export default function ListingForm() {
@@ -31,18 +31,18 @@ export default function ListingForm() {
         ...empty,
         ...data,
         amenities: data.amenities.join(', '),
-        imageUrl: data.images[0] || '',
+        imageUrls: data.images ? data.images.join(', ') : '',
       })
     );
   }, [id, isEdit]);
 
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
-  // TODO: replace the image URL field with real image upload (Cloudinary / multer).
+  // TODO: replace the image URLs field with real image upload (Cloudinary / multer).
   const submit = async (e) => {
     e.preventDefault();
     setError('');
-    const { title, description, type, city, state, address, imageUrl, amenities } = form;
+    const { title, description, type, city, state, address, imageUrls, amenities } = form;
     const payload = {
       title,
       description,
@@ -55,7 +55,11 @@ export default function ListingForm() {
       bedrooms: Number(form.bedrooms),
       amenities: amenities.split(',').map((a) => a.trim()).filter(Boolean),
     };
-    if (imageUrl) payload.images = [imageUrl];
+    
+    if (imageUrls) {
+      payload.images = imageUrls.split(',').map(url => url.trim()).filter(Boolean);
+    }
+    
     try {
       if (isEdit) await api.put(`/listings/${id}`, payload);
       else await api.post('/listings', payload);
@@ -90,7 +94,7 @@ export default function ListingForm() {
         </label>
       </div>
       <input placeholder="Amenities (comma separated: WiFi, AC, Parking)" value={form.amenities} onChange={set('amenities')} />
-      <input placeholder="Image URL (optional)" value={form.imageUrl} onChange={set('imageUrl')} />
+      <input placeholder="Image URLs (comma separated)" value={form.imageUrls} onChange={set('imageUrls')} />
       {error && <p className="error">{error}</p>}
       <button className="btn">{isEdit ? 'Save changes' : 'Publish listing'}</button>
     </form>

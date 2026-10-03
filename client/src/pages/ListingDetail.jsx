@@ -10,6 +10,8 @@ export default function ListingDetail() {
   const [listing, setListing] = useState(null);
   const [error, setError] = useState('');
 
+  const [activeImg, setActiveImg] = useState(0);
+
   const load = () =>
     api
       .get(`/listings/${id}`)
@@ -31,8 +33,31 @@ export default function ListingDetail() {
         {listing.city}, {listing.state}
       </p>
 
-      {/* TODO: image gallery / carousel when a listing has multiple images */}
-      <img className="hero-img" src={listing.images[0]} alt={listing.title} />
+      <div className="gallery" style={{ marginBottom: '24px' }}>
+        <img className="hero-img" src={listing.images[activeImg]} alt={listing.title} style={{ marginBottom: '12px' }} />
+        {listing.images.length > 1 && (
+          <div className="thumbnails row" style={{ overflowX: 'auto', gap: '10px' }}>
+            {listing.images.map((img, i) => (
+              <img
+                key={i}
+                src={img}
+                alt={`Thumbnail ${i + 1}`}
+                onClick={() => setActiveImg(i)}
+                style={{
+                  width: '100px',
+                  height: '75px',
+                  objectFit: 'cover',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  border: i === activeImg ? '2px solid var(--primary)' : '2px solid transparent',
+                  opacity: i === activeImg ? 1 : 0.6,
+                  transition: '0.2s',
+                }}
+              />
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="detail-layout">
         <div>
