@@ -19,10 +19,18 @@ export default function Trips() {
     load();
   }, []);
 
-  // TODO: ask for confirmation before cancelling.
-  const cancel = async (id) => {
+  // Show a confirmation dialog with the stay name and dates before cancelling.
+  const cancel = async (booking) => {
+    const checkIn = formatDate(booking.checkIn);
+    const checkOut = formatDate(booking.checkOut);
+    const confirmed = window.confirm(
+      `Cancel your trip to "${booking.listing?.title}"?\n` +
+      `Dates: ${checkIn} → ${checkOut}\n\n` +
+      `This action cannot be undone.`
+    );
+    if (!confirmed) return;
     try {
-      await api.patch(`/bookings/${id}/cancel`);
+      await api.patch(`/bookings/${booking._id}/cancel`);
       load();
     } catch (err) {
       setError(getErrorMessage(err));
@@ -54,7 +62,7 @@ export default function Trips() {
               <span className={`status status-${b.status}`}>{b.status}</span>
               <strong>{formatINR(b.totalPrice)}</strong>
               {['pending', 'confirmed'].includes(b.status) && (
-                <button className="btn btn-danger" onClick={() => cancel(b._id)}>Cancel</button>
+                <button className="btn btn-danger" onClick={() => cancel(b)}>Cancel</button>
               )}
             </div>
           </div>
